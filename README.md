@@ -22,9 +22,24 @@ services:
     entrypoint: ['bash', '-c', 'export LANG=en_US.UTF-8 && python main.py']
 ```
 
-然后安装中文字体：
+进入容器内，创建字体目录：
+
+```bash
+cd /usr/share/fonts
+mkdir meme-fonts
+```
+
+将 [meme-generator 字体目录](https://git.paperplane.cc/chiskat/meme-generator-fix-deps/src/branch/main/resources/fonts) 中的字体拷贝到此目录中。
+
+然后刷新字体缓存：
+
+```bash
+cd /usr/share/fonts/meme-fonts
+fc-cache -fv
+```
+
+如果需要用到 emoji 字体，可以这样安装：
 
 ```bash
 apt install fonts-noto-color-emoji
-cd /usr/share/fonts/meme-fonts && fc-cache -fv
 ```
