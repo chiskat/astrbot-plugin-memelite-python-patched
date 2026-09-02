@@ -21,19 +21,21 @@ def _parse_version(version: str) -> tuple[int, int, int]:
 
 
 def _resolve_version(module: Any) -> str:
-    try:
-        from meme_generator.version import __version__ as legacy_version  # type: ignore
-
-        return str(legacy_version)
-    except ImportError:
-        pass
-
+    # 新版 meme_generator (>=0.2.0) 提供 get_version()，优先使用它，
+    # 避免旧版 version.py 残留导致版本被误判为旧版。
     get_version = getattr(module, "get_version", None)
     if callable(get_version):
         try:
             return str(get_version())
         except Exception:
             pass
+
+    try:
+        from meme_generator.version import __version__ as legacy_version
+
+        return str(legacy_version)
+    except ImportError:
+        pass
 
     try:
         return get_package_version("meme_generator")
@@ -322,7 +324,7 @@ class MemeManager:
         params = self._get_params(meme)
         images, texts, options = await self.collect.collect_params(event, params)
 
-        if self.is_py_version:
+        if self.is_py_version and callable(meme):
             run_sync = self.run_sync
             if not run_sync:
                 return None
@@ -333,7 +335,11 @@ class MemeManager:
 
         meme_image_type = self.MemeImage
         if not meme_image_type:
-            return None
+            # 兼容混合安装/version.py 残留：运行时按 Meme 对象能力回退到新版 API。
+            from meme_generator import Image as MemeImage
+
+            self.MemeImage = MemeImage
+            meme_image_type = MemeImage
 
         meme_images = [
             meme_image_type(name=str(name), data=data) for name, data in images
