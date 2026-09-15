@@ -1,8 +1,8 @@
-name: astrbot_plugin_memelite_fix_deps
-display_name: 表情包生成器修复版
+name: astrbot_plugin_memelite_python_patched
+display_name: '表情包生成器 Python 修复版'
 desc: 表情包生成器，制作各种沙雕表情
 help: 略
-version: v3.0.3
+version: v3.0.4
 author: chiskat
-repo: https://git.paperplane.cc/chiskat/astrbot-plugin-memelite-fix-deps
+repo: https://github.com/chiskat/astrbot-plugin-memelite-python-patched
 astrbot_version: '>=4.0.0'
