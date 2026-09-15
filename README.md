@@ -10,11 +10,30 @@ GitHub 点击 “Code” 按钮，下拉菜单中选择 “Download ZIP” 下�
 
 # 更新说明
 
-此项目将原始上游依赖 Python 版 [meme-generator](https://github.com/MemeCrafters/meme-generator) 替换为了由我 fork 的 [meme-generator-next](https://github.com/chiskat/meme-generator-next) v0.1.18，它的 `Pillow` 版本已兼容 Astrbot，且支持通过环境变量自定义配置文件路径。
+此项目将原始上游依赖 Python 版 [meme-generator](https://github.com/MemeCrafters/meme-generator) 替换为了由我 fork 的 [meme-generator-next](https://github.com/chiskat/meme-generator-next) v0.2.3，它的 `Pillow` 版本已兼容 Astrbot，且支持通过环境变量自定义配置文件路径。
 
 # 疑难解答
 
-Docker 部署的 AstrBot，直接安装本插件可能会报错，可能是缺系统依赖，进入容器执行：
+## 依赖项 `pycairo` 安装失败
+
+因为部分表情包需要 `pycairo` 依赖，因此依赖项 `meme-generator-next` 依赖了 `pycairo`；而 PyPI 只提供 Windows 的 wheel，在 Linux/ARM 容器中会从源码编译，因此需要 `pkg-config` 和 Cairo 开发头文件。
+
+如果安装插件时报错：
+
+```text
+Dependency lookup for cairo with method 'pkg-config' failed
+```
+
+则可以安装开发头文件：
+
+```bash
+apt update
+apt install -y --no-install-recommends pkg-config libcairo2-dev
+```
+
+## Docker 中运行失败
+
+补全一些图形相关软件包：
 
 ```bash
 chmod 1777 /tmp
@@ -22,9 +41,15 @@ apt update
 apt install -y libgl1 libglib2.0-0 libgl1-mesa-dev
 ```
 
----
+## 处理中文字体和 Emoji
 
-出现中文乱码时，修改 `docker-compose.yml` 为：
+解决方式：
+
+```bash
+export LANG=en_US.UTF-8
+```
+
+如果是 Docker 部署，修改 `docker-compose.yml` 为：
 
 ```yaml
 services:
@@ -32,7 +57,7 @@ services:
     entrypoint: ['bash', '-c', 'export LANG=en_US.UTF-8 && python main.py']
 ```
 
-进入容器内，创建字体目录：
+然后进入容器内，创建字体目录：
 
 ```bash
 cd /usr/share/fonts
@@ -48,7 +73,9 @@ cd /usr/share/fonts/meme-fonts
 fc-cache -fv
 ```
 
-如果需要用到 emoji 字体，可以这样安装：
+---
+
+如果是 Linux 系统，需要用到 emoji 字体，可以这样安装：
 
 ```bash
 apt install fonts-noto-color-emoji
